@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#08080e" />
+<title>دریافت آهنگ</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#08080e;--card:rgba(255,255,255,0.045);--card2:rgba(255,255,255,0.07);
+  --border:rgba(255,255,255,0.09);--gold:#d4af37;--gold2:#f7e3a1;
+  --violet:#8b6cff;--violet2:#b39cff;--text:#f0f0f7;--muted:#8a8aa3;
+  --danger:#ff5c72;--success:#3ddc97;
+  --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
+}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--bg);color:var(--text);
+  font-family:'Vazirmatn',sans-serif;user-select:none;-webkit-user-select:none;position:fixed;width:100%;}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+   radial-gradient(circle at 15% 10%,rgba(139,108,255,.22),transparent 45%),
+   radial-gradient(circle at 85% 85%,rgba(212,175,55,.16),transparent 45%),
+   radial-gradient(circle at 50% 50%,rgba(20,20,35,.6),transparent 70%),
+   var(--bg);}
+::-webkit-scrollbar{display:none;}
+input,textarea,button,select{font-family:inherit;color:inherit;outline:none;border:none;background:none;}
+
+.screen{position:fixed;inset:0;z-index:1;display:flex;flex-direction:column;
+  opacity:0;pointer-events:none;transform:translateY(14px) scale(.99);
+  transition:opacity .4s cubic-bezier(.22,1,.36,1),transform .4s cubic-bezier(.22,1,.36,1);}
+.screen.active{opacity:1;pointer-events:auto;transform:none;}
+
+.app-container {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: calc(30px + var(--safe-top)) 24px calc(30px + var(--safe-bottom));
+  position: relative; z-index: 2; overflow-y: auto;
+}
+
+.logo {
+  position: relative; width: 100px; height: 100px; margin-bottom: 24px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.logo-ring {
+  position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid transparent;
+  background: linear-gradient(135deg, var(--gold), var(--violet), var(--gold)) border-box;
+  -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: spin 9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.logo-core {
+  width: 50px; height: 50px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold2), var(--violet));
+  box-shadow: 0 0 32px rgba(212,175,55,.45), 0 0 60px rgba(139,108,255,.3);
+  display: flex; align-items: center; justify-content: center; font-size: 24px;
+}
+
+h1.brand {
+  font-size: 24px; font-weight: 800; letter-spacing: 1px; margin-bottom: 8px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--gold2), var(--violet2));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+p.subtitle {
+  font-size: 13.5px; color: var(--muted); margin-bottom: 32px; text-align: center; line-height: 1.6; flex-shrink: 0;
+}
+
+.form-card {
+  width: 100%; max-width: 340px; padding: 24px 20px; border-radius: 24px;
+  background: linear-gradient(160deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  border: 1px solid var(--border); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  display: flex; flex-direction: column; gap: 16px; box-shadow: 0 10px 40px rgba(0,0,0,.3);
+}
+
+.input-group { display: flex; flex-direction: column; gap: 8px; }
+.input-group label { font-size: 12px; font-weight: 600; color: var(--muted); margin-right: 6px; }
+.input-group input {
+  width: 100%; padding: 14px 16px; border-radius: 14px;
+  border: 1px solid var(--border); background: rgba(0,0,0,.2); color: var(--text);
+  font-size: 14px; transition: .2s;
+}
+.input-group input:focus { border-color: rgba(212,175,55,.5); background: rgba(0,0,0,.4); }
+.input-group input::placeholder { color: rgba(255,255,255,.2); }
+
+.submit-btn {
+  margin-top: 10px; padding: 16px; border-radius: 14px; font-size: 14px; font-weight: 700;
+  color: #1a1408; background: linear-gradient(135deg, var(--gold2), var(--gold));
+  transition: .2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.submit-btn:active { transform: scale(.97); }
+.submit-btn:disabled { opacity: .7; pointer-events: none; }
+
+.success-icon { font-size: 60px; margin-bottom: 20px; filter: drop-shadow(0 0 20px rgba(61,220,151,.5)); }
+.success-title { font-size: 22px; font-weight: 800; color: var(--success); margin-bottom: 12px; }
+.success-text { font-size: 14px; color: var(--muted); text-align: center; line-height: 1.8; margin-bottom: 30px; }
+.success-btn {
+  padding: 14px 30px; border-radius: 14px; font-size: 14px; font-weight: 600;
+  border: 1px solid var(--border); background: var(--card); color: var(--text); transition: .2s;
+}
+.success-btn:active { transform: scale(.95); background: var(--card2); }
+
+.toast {
+  position: fixed; bottom: calc(40px + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(20px);
+  padding: 12px 22px; border-radius: 14px; font-size: 13px; font-weight: 500; z-index: 100;
+  background: rgba(30,30,45,.95); border: 1px solid var(--border); color: var(--text);
+  backdrop-filter: blur(20px); opacity: 0; pointer-events: none; transition: .3s; white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.err { border-color: rgba(255,92,114,.4); color: #ffb3bf; }
+.toast.ok { border-color: rgba(61,220,151,.4); color: #a8f5d4; }
+</style>
+</head>
+<body>
+
+<!-- ===== SCREEN 1: FORM ===== -->
+<div id="formScreen" class="screen active">
+  <div class="app-container">
+    <div class="logo">
+      <div class="logo-ring"></div>
+      <div class="logo-core">🎵</div>
+    </div>
+    <h1 class="brand">دریافت آهنگ</h1>
+    <p class="subtitle">برای دریافت آهنگ‌های اختصاصی، اطلاعات خود را وارد کنید. این آهنگ‌ها به صورت رایگان برای شما ارسال می‌شود.</p>
+
+    <form id="leadForm" class="form-card">
+      <div class="input-group">
+        <label>نام</label>
+        <input type="text" id="fName" placeholder="مثلاً: علی" required />
+      </div>
+      <div class="input-group">
+        <label>نام خانوادگی</label>
+        <input type="text" id="lName" placeholder="مثلاً: رضایی" required />
+      </div>
+      <div class="input-group">
+        <label>شماره تماس</label>
+        <input type="tel" id="phone" placeholder="۰۹۱۲۳۴۵۶۷۸۹" required />
+      </div>
+      <button type="submit" class="submit-btn" id="submitBtn">
+        <span>دریافت آهنگ</span>
+        <span>🎧</span>
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ===== SCREEN 2: SUCCESS ===== -->
+<div id="successScreen" class="screen">
+  <div class="app-container">
+    <div class="success-icon">🎉</div>
+    <h1 class="success-title">ثبت شد!</h1>
+    <p class="success-text">
+      اطلاعات شما با موفقیت ثبت شد.<br>
+      آهنگ‌ها به زودی برای شما ارسال خواهد شد.
+    </p>
+    <button class="success-btn" onclick="goBack()">بازگشت به فرم</button>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+/* =====================================================
+   لینک Formspree شما در اینجا قرار گرفت
+   ===================================================== */
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/xqpqwgpd";
+
+/* ===================================================== */
+
+const $ = s => document.querySelector(s);
+const form = $('#leadForm');
+const submitBtn = $('#submitBtn');
+
+window.showToast = function(msg, type='') {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+window.goBack = function() {
+  $('#successScreen').classList.remove('active');
+  $('#formScreen').classList.add('active');
+  form.reset();
+  submitBtn.disabled = false;
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const fName = $('#fName').value.trim();
+  const lName = $('#lName').value.trim();
+  const phone = $('#phone').value.trim();
+
+  if(!fName || !lName || !phone) {
+    showToast('لطفاً همه فیلدها را پر کنید', 'err');
+    return;
+  }
+
+  const phoneClean = phone.replace(/\D/g, '');
+  if(phoneClean.length < 11) {
+    showToast('شماره تماس معتبر وارد کنید', 'err');
+    return;
+  }
+
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<span>در حال ارسال...</span> <span>⏳</span>';
+
+  const formData = {
+    "نام": fName,
+    "نام خانوادگی": lName,
+    "شماره تماس": phone,
+    "_subject": `درخواست آهنگ جدید از ${fName} ${lName}`
+  };
+
+  try {
+    const response = await fetch(FORMSPREE_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(formData)
+    });
+
+    if(response.ok) {
+      $('#formScreen').classList.remove('active');
+      $('#successScreen').classList.add('active');
+      form.reset();
+      submitBtn.innerHTML = '<span>دریافت آهنگ</span> <span>🎧</span>';
+      submitBtn.disabled = false;
+    } else {
+      const data = await response.json();
+      showToast('خطا در ارسال: ' + (data.error || 'مشکلی پیش آمد'), 'err');
+      submitBtn.innerHTML = '<span>دریافت آهنگ</span> <span>🎧</span>';
+      submitBtn.disabled = false;
+    }
+  } catch (error) {
+    showToast('خطای شبکه. لطفاً اتصال اینترنت خود را بررسی کنید.', 'err');
+    submitBtn.innerHTML = '<span>دریافت آهنگ</span> <span>🎧</span>';
+    submitBtn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>
